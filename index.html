@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Icewind Dale — A Campanha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ice-white: #e8f4f8;
+    --ice-blue: #a8d4e6;
+    --deep-blue: #1a3a52;
+    --midnight: #0a0f1a;
+    --frost: #d0eaf5;
+    --gold: #c9a227;
+    --gold-light: #e8c45a;
+    --ember: #c44b1e;
+    --stone: #2a3040;
+    --text-main: #dce8ef;
+    --text-muted: #8aacbe;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--midnight);
+    color: var(--text-main);
+    font-family: 'EB Garamond', serif;
+    font-size: 18px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  /* ===== SNOWFLAKES ===== */
+  .snowfield {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .flake {
+    position: absolute;
+    top: -10px;
+    color: rgba(200,230,245,0.4);
+    font-size: 10px;
+    animation: fall linear infinite;
+    user-select: none;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem 6rem;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 70%, rgba(26,58,82,0.8) 0%, transparent 70%),
+      radial-gradient(ellipse at 20% 30%, rgba(168,212,230,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(168,212,230,0.05) 0%, transparent 50%);
+  }
+
+  .aurora {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg,
+      rgba(34,80,60,0.18) 0%,
+      rgba(20,90,120,0.22) 30%,
+      rgba(80,20,120,0.12) 60%,
+      transparent 100%
+    );
+    animation: aurora-shift 12s ease-in-out infinite alternate;
+    filter: blur(30px);
+  }
+
+  @keyframes aurora-shift {
+    0% { opacity: 0.5; transform: scaleX(1) scaleY(1); }
+    50% { opacity: 0.8; transform: scaleX(1.1) scaleY(1.2); }
+    100% { opacity: 0.5; transform: scaleX(0.95) scaleY(0.9); }
+  }
+
+  .hero-mountain {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    opacity: 0.15;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpolygon points='0,320 180,80 360,200 540,40 720,180 900,60 1080,200 1260,90 1440,220 1440,320' fill='%23a8d4e6'/%3E%3C/svg%3E") no-repeat bottom center / cover;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,162,39,0.4);
+    padding: 6px 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2.8rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--ice-white);
+    text-shadow:
+      0 0 40px rgba(168,212,230,0.3),
+      0 0 80px rgba(168,212,230,0.15),
+      2px 2px 0 rgba(0,0,0,0.5);
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+
+  .hero-title span {
+    color: var(--ice-blue);
+    display: block;
+  }
+
+  .hero-subtitle {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--text-muted);
+    margin-top: 1.5rem;
+    max-width: 560px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1s 0.4s ease both;
+  }
+
+  .hero-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2.5rem 0;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1s 0.5s ease both;
+  }
+
+  .hero-divider::before,
+  .hero-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,162,39,0.5), transparent);
+    width: 120px;
+  }
+
+  .rune {
+    color: var(--gold);
+    font-size: 1.4rem;
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { text-shadow: 0 0 8px rgba(201,162,39,0.4); }
+    50% { text-shadow: 0 0 20px rgba(201,162,39,0.8), 0 0 40px rgba(201,162,39,0.3); }
+  }
+
+  .hero-cta {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-decoration: none;
+    border: 1px solid rgba(201,162,39,0.5);
+    padding: 14px 36px;
+    transition: all 0.3s;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1s 0.6s ease both;
+  }
+
+  .hero-cta:hover {
+    background: rgba(201,162,39,0.1);
+    border-color: var(--gold);
+    box-shadow: 0 0 30px rgba(201,162,39,0.2);
+    color: var(--gold-light);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== SECTIONS ===== */
+  section { position: relative; z-index: 1; }
+
+  .section-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.8rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    color: var(--ice-white);
+    line-height: 1.2;
+    margin-bottom: 2rem;
+  }
+
+  .section-title .accent { color: var(--ice-blue); }
+
+  .divider-line {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0 3rem;
+  }
+
+  .divider-line::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(201,162,39,0.4), transparent);
+  }
+
+  .divider-rune { color: var(--gold); font-size: 1rem; }
+
+  /* ===== INTRO LORE ===== */
+  .lore-block {
+    background: linear-gradient(135deg, rgba(26,58,82,0.4), rgba(10,15,26,0.6));
+    border: 1px solid rgba(168,212,230,0.12);
+    border-left: 3px solid rgba(168,212,230,0.4);
+    padding: 2.5rem 2.5rem;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--frost);
+    line-height: 1.9;
+    position: relative;
+  }
+
+  .lore-block::before {
+    content: '"';
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 5rem;
+    color: rgba(168,212,230,0.12);
+    position: absolute;
+    top: -0.5rem;
+    left: 1rem;
+    line-height: 1;
+  }
+
+  /* ===== TWO COL LAYOUT ===== */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; gap: 2.5rem; }
+  }
+
+  /* ===== LOCATION CARDS ===== */
+  .locations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .loc-card {
+    background: linear-gradient(160deg, rgba(26,58,82,0.5), rgba(10,15,26,0.7));
+    border: 1px solid rgba(168,212,230,0.1);
+    padding: 2rem;
+    transition: all 0.35s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loc-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(168,212,230,0.5), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s;
+  }
+
+  .loc-card:hover {
+    border-color: rgba(168,212,230,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+
+  .loc-card:hover::before { transform: scaleX(1); }
+
+  .loc-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .loc-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ice-white);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  .loc-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .loc-danger {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    margin-top: 1rem;
+    padding: 3px 10px;
+    border: 1px solid;
+  }
+
+  .danger-high { color: var(--ember); border-color: rgba(196,75,30,0.4); }
+  .danger-mid { color: var(--gold); border-color: rgba(201,162,39,0.4); }
+  .danger-low { color: var(--ice-blue); border-color: rgba(168,212,230,0.3); }
+
+  /* ===== CHARACTERS ===== */
+  .chars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .char-card {
+    background: rgba(10,15,26,0.7);
+    border: 1px solid rgba(168,212,230,0.08);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .char-card:hover {
+    border-color: rgba(201,162,39,0.3);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+
+  .char-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    border: 2px solid rgba(201,162,39,0.3);
+    background: rgba(26,58,82,0.6);
+  }
+
+  .char-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ice-white);
+    margin-bottom: 0.25rem;
+  }
+
+  .char-class {
+    font-size: 0.8rem;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .char-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .char-level {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--ice-blue);
+    border: 1px solid rgba(168,212,230,0.25);
+    padding: 2px 10px;
+  }
+
+  /* ===== ENCOUNTERS ===== */
+  .encounter-list { margin-top: 2rem; }
+
+  .encounter-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(168,212,230,0.07);
+  }
+
+  .encounter-item:last-child { border-bottom: none; }
+
+  .enc-num {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: rgba(168,212,230,0.15);
+    line-height: 1;
+    min-width: 2.5rem;
+  }
+
+  .enc-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ice-white);
+    margin-bottom: 0.4rem;
+  }
+
+  .enc-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .enc-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border: 1px solid;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .tag-combat { color: var(--ember); border-color: rgba(196,75,30,0.4); }
+  .tag-social { color: #7ecfa0; border-color: rgba(126,207,160,0.35); }
+  .tag-mystery { color: var(--gold); border-color: rgba(201,162,39,0.4); }
+  .tag-exploration { color: var(--ice-blue); border-color: rgba(168,212,230,0.35); }
+
+  /* ===== DARK PROPHECY ===== */
+  .prophecy-section {
+    background: linear-gradient(180deg, transparent, rgba(26,58,82,0.25), transparent);
+    padding: 6rem 0;
+  }
+
+  .prophecy-text {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    text-align: center;
+    color: var(--frost);
+    line-height: 2;
+    max-width: 700px;
+    margin: 0 auto;
+    text-shadow: 0 0 20px rgba(168,212,230,0.2);
+  }
+
+  .prophecy-text em {
+    color: var(--gold);
+    font-style: normal;
+  }
+
+  /* ===== STATS BAR ===== */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: rgba(168,212,230,0.08);
+    border: 1px solid rgba(168,212,230,0.08);
+    margin-top: 4rem;
+  }
+
+  .stat-block {
+    padding: 2.5rem 2rem;
+    text-align: center;
+    background: rgba(10,15,26,0.8);
+  }
+
+  .stat-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2.5rem;
+    color: var(--gold);
+    display: block;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid rgba(168,212,230,0.08);
+  }
+
+  footer p {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: rgba(138,172,190,0.4);
+  }
+
+  footer .rune-line {
+    color: rgba(201,162,39,0.3);
+    font-size: 1.2rem;
+    letter-spacing: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 3rem;
+    background: linear-gradient(180deg, rgba(10,15,26,0.95), transparent);
+    backdrop-filter: blur(4px);
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.25s;
+  }
+
+  .nav-links a:hover { color: var(--ice-white); }
+
+  @media (max-width: 600px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+  }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- Snowflakes -->
+<div class="snowfield" id="snow"></div>
+
+<!-- Nav -->
+<nav>
+  <a href="#" class="nav-logo">❄ Icewind Dale</a>
+  <ul class="nav-links">
+    <li><a href="#lore">O Mundo</a></li>
+    <li><a href="#locais">Locais</a></li>
+    <li><a href="#personagens">Heróis</a></li>
+    <li><a href="#encontros">Encontros</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="aurora"></div>
+  <div class="hero-mountain"></div>
+
+  <div class="hero-badge">Dungeons & Dragons · Campanha</div>
+
+  <h1 class="hero-title">
+    Icewind
+    <span>Dale</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Onde o inverno eterno rege as terras e criaturas das trevas aguardam além das tempestades de neve...
+  </p>
+
+  <div class="hero-divider">
+    <span class="rune">✦</span>
+    <span class="rune" style="opacity:0.5; font-size:0.9rem;">❄</span>
+    <span class="rune">✦</span>
+  </div>
+
+  <a href="#lore" class="hero-cta">Adentre as Terras Geladas</a>
+</section>
+
+<!-- LORE -->
+<section id="lore">
+  <div class="section-wrap">
+    <span class="section-label reveal">O Cenário</span>
+    <h2 class="section-title reveal">A Terra do <span class="accent">Inverno Eterno</span></h2>
+    <div class="divider-line reveal"><span class="divider-rune">✦</span></div>
+
+    <div class="lore-block reveal">
+      Nas fronteiras norte-esquecidas de Faerûn, além das Montanhas da Espinha do Mundo, existe uma terra amaldiçoada onde o sol mal toca o horizonte. Dez vilarejos — conhecidos coletivamente como as Dez-Cidades — sobrevivem à beira da extinção, mantidos vivos apenas pela pesca no Lac Dinneshere e pelo espírito indomável de seus habitantes. Mas algo antigo e terrível acordou sob o gelo...
+    </div>
+
+    <div class="two-col" style="margin-top: 3rem;">
+      <div class="reveal">
+        <h3 style="font-family:'Cinzel',serif; color:var(--ice-white); margin-bottom:1rem; font-size:1.1rem; letter-spacing:0.05em;">A Maldição do Verão Perdido</h3>
+        <p style="color:var(--text-muted); line-height:1.85;">
+          Auril, a Rainha do Gelo, estendeu sua influência sobre toda a região. O verão não chegou há três anos. As tempestades duram semanas. As crianças nunca viram o sol pleno. E nas noites mais escuras, vozes chamam pelos ventos — sussurros que prometem calor em troca da alma.
+        </p>
+        <p style="color:var(--text-muted); line-height:1.85; margin-top:1rem;">
+          Os aventureiros chegaram por motivos diferentes: uns buscando fortunas nas minas de black ice, outros fugindo de passados sombrios. Mas o destino os reuniu nas Dez-Cidades, onde a missão real os aguarda.
+        </p>
+      </div>
+      <div class="reveal reveal-delay-1">
+        <h3 style="font-family:'Cinzel',serif; color:var(--ice-white); margin-bottom:1rem; font-size:1.1rem; letter-spacing:0.05em;">O Terror Que Vem do Norte</h3>
+        <p style="color:var(--text-muted); line-height:1.85;">
+          Relatos chegam de vilarejos abandonados, rastros de patas imensuráveis na neve, e caçadores encontrados congelados com expressões de terror absoluto. Os xamãs das tribos Reghed falam de um Yeti maior que uma casa — um ancestral corrompido que não caça por fome, mas por ódio ao calor e à vida.
+        </p>
+        <p style="color:var(--text-muted); line-height:1.85; margin-top:1rem;">
+          Por baixo de tudo, sussurros de <em style="color:var(--ice-blue);">Ythryn</em> — a cidade mágica que afundou na tundra mil anos atrás, e cujos segredos podem ser a única salvação da região.
+        </p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row reveal">
+      <div class="stat-block">
+        <span class="stat-num">10</span>
+        <span class="stat-label">Vilarejos</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-num">−40°</span>
+        <span class="stat-label">Temperatura Mínima</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-num">3</span>
+        <span class="stat-label">Anos sem Verão</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-num">∞</span>
+        <span class="stat-label">Anos de Inverno</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROPHECY -->
+<section class="prophecy-section">
+  <div class="section-wrap" style="padding: 0 2rem;">
+    <p class="prophecy-text reveal">
+      "Quando as <em>estrelas de inverno</em> alinharem,<br>
+      e o último fogo das Dez-Cidades <em>apagar</em>,<br>
+      somente aqueles que carregam o <em>coração de chama</em><br>
+      poderão despertar o sol adormecido."
+    </p>
+  </div>
+</section>
+
+<!-- LOCAIS -->
+<section id="locais">
+  <div class="section-wrap">
+    <span class="section-label reveal">Locais</span>
+    <h2 class="section-title reveal">As <span class="accent">Dez-Cidades</span> e Arredores</h2>
+    <div class="divider-line reveal"><span class="divider-rune">✦</span></div>
+
+    <div class="locations-grid">
+      <div class="loc-card reveal">
+        <span class="loc-icon">🏰</span>
+        <div class="loc-name">Bryn Shander</div>
+        <p class="loc-desc">A maior das Dez-Cidades. Um bastião de pedra e madeira cercado por muralhas, sede do conselho das cidades e único entreposto comercial da região.</p>
+        <span class="loc-danger danger-mid">Perigo: Moderado</span>
+      </div>
+
+      <div class="loc-card reveal reveal-delay-1">
+        <span class="loc-icon">🎣</span>
+        <div class="loc-name">Easthaven</div>
+        <p class="loc-desc">Porto no Lac Dinneshere. Os pescadores aqui conhecem segredos que preferem não compartilhar — e as águas escondem mais do que peixe.</p>
+        <span class="loc-danger danger-mid">Perigo: Moderado</span>
+      </div>
+
+      <div class="loc-card reveal reveal-delay-2">
+        <span class="loc-icon">⛏️</span>
+        <div class="loc-name">Kelvin's Cairn</div>
+        <p class="loc-desc">A montanha mais alta da região. Diz-se que fúrias da tempestade habitam seus picos e que nas cavernas anãs jaz o coração de gelo da própria Auril.</p>
+        <span class="loc-danger danger-high">Perigo: Extremo</span>
+      </div>
+
+      <div class="loc-card reveal">
+        <span class="loc-icon">🌊</span>
+        <div class="loc-name">Lac Dinneshere</div>
+        <p class="loc-desc">O grande lago congelado cuja pesca sustenta metade das Dez-Cidades. Sob o gelo espesso, ruínas submersas aguardam exploradores audaciosos — e temerários.</p>
+        <span class="loc-danger danger-high">Perigo: Alto</span>
+      </div>
+
+      <div class="loc-card reveal reveal-delay-1">
+        <span class="loc-icon">🏕️</span>
+        <div class="loc-name">Acampamento Reghed</div>
+        <p class="loc-desc">As tribos bárbaras que seguem as manadas de renas. Guerreiros orgulhosos que desconfiam dos "moradores de pedra" mas podem se tornar aliados preciosos.</p>
+        <span class="loc-danger danger-low">Perigo: Baixo</span>
+      </div>
+
+      <div class="loc-card reveal reveal-delay-2">
+        <span class="loc-icon">❄️</span>
+        <div class="loc-name">Ythryn (Ruínas)</div>
+        <p class="loc-desc">A lendária cidade netherese soterrada pela neve. Magias proibidas ainda pulsam em suas torres sepultadas. Encontrá-la pode mudar o destino de toda Icewind Dale.</p>
+        <span class="loc-danger danger-high">Perigo: Extremo</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERSONAGENS -->
+<section id="personagens" style="background: linear-gradient(180deg, transparent, rgba(26,58,82,0.15), transparent);">
+  <div class="section-wrap">
+    <span class="section-label reveal">Os Heróis</span>
+    <h2 class="section-title reveal">Defensores das <span class="accent">Dez-Cidades</span></h2>
+    <div class="divider-line reveal"><span class="divider-rune">✦</span></div>
+
+    <div class="chars-grid">
+      <div class="char-card reveal">
+        <div class="char-avatar">🗡️</div>
+        <div class="char-name">Aeric Stormborn</div>
+        <div class="char-class">Guerreiro · Batalha</div>
+        <p class="char-desc">Ex-mercenário das planícies que veio ao norte em busca de redenção. Sua espada nunca aqueceu, mas seu coração ainda arde.</p>
+        <span class="char-level">Nível 6</span>
+      </div>
+
+      <div class="char-card reveal reveal-delay-1">
+        <div class="char-avatar">🌿</div>
+        <div class="char-name">Sylara da Névoa</div>
+        <div class="char-class">Druida · Círculo do Ártico</div>
+        <p class="char-desc">Uma elfa que escuta o choro da terra congelada. Diz que as próprias árvores mortas ainda sussurram para ela nos ventos do norte.</p>
+        <span class="char-level">Nível 6</span>
+      </div>
+
+      <div class="char-card reveal reveal-delay-2">
+        <div class="char-avatar">🔮</div>
+        <div class="char-name">Orvyn Espinheiro</div>
+        <div class="char-class">Mago · Evocação</div>
+        <p class="char-desc">Um gnomo obcecado com as magias netherese de Ythryn. Cada feitiço que lança parece atrair algo das profundezas do gelo.</p>
+        <span class="char-level">Nível 6</span>
+      </div>
+
+      <div class="char-card reveal">
+        <div class="char-avatar">⚡</div>
+        <div class="char-name">Kaz Trovão-de-Pedra</div>
+        <div class="char-class">Bárbaro · Ancestral Totêmico</div>
+        <p class="char-desc">Um meio-orc da tribo Elk cujo totem é o urso polar. Luta com uma fúria que aquece o ar ao redor — mesmo a −30 graus.</p>
+        <span class="char-level">Nível 6</span>
+      </div>
+
+      <div class="char-card reveal reveal-delay-1">
+        <div class="char-avatar">🎵</div>
+        <div class="char-name">Vessa Palavras-de-Gelo</div>
+        <div class="char-class">Bardo · Colégio do Conhecimento</div>
+        <p class="char-desc">Bardessa tiefling que coleciona segredos como outros coletam moedas. Sabe sobre Ythryn coisas que não deveriam ser conhecidas por vivos.</p>
+        <span class="char-level">Nível 6</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENCONTROS -->
+<section id="encontros">
+  <div class="section-wrap">
+    <span class="section-label reveal">Crônicas</span>
+    <h2 class="section-title reveal">Encontros <span class="accent">Memoráveis</span></h2>
+    <div class="divider-line reveal"><span class="divider-rune">✦</span></div>
+
+    <div class="encounter-list">
+
+      <div class="encounter-item reveal">
+        <div class="enc-num">01</div>
+        <div>
+          <div class="enc-title">A Noite das Bestas Furiosas</div>
+          <p class="enc-desc">Uma matilha de lobos gigantes do gelo atacou Bryn Shander sob aurora boreal. O partido defendeu o portão sul por horas — Kaz sozinho enfrentou o alfa, recebendo uma cicatriz que nunca cicatriza completamente.</p>
+        </div>
+        <span class="enc-tag tag-combat">Combate</span>
+      </div>
+
+      <div class="encounter-item reveal">
+        <div class="enc-num">02</div>
+        <div>
+          <div class="enc-title">O Mercador Sem Sombra</div>
+          <p class="enc-desc">Em Easthaven, um mercador vendendo "calor engarrafado" se revelou um cultista de Auril coletando memórias quentes das pessoas. Vessa o confrontou em debate filosófico enquanto o restante do grupo armava a emboscada.</p>
+        </div>
+        <span class="enc-tag tag-mystery">Mistério</span>
+      </div>
+
+      <div class="encounter-item reveal">
+        <div class="enc-num">03</div>
+        <div>
+          <div class="enc-title">Negociação com os Reghed</div>
+          <p class="enc-desc">Aeric quase causou uma guerra ao cumprimentar o chefe bárbaro da maneira errada. Somente a intervenção de Kaz — reconhecido como "sangue da tundra" — impediu um banho de sangue. A tribo agora é aliada relutante.</p>
+        </div>
+        <span class="enc-tag tag-social">Social</span>
+      </div>
+
+      <div class="encounter-item reveal">
+        <div class="enc-num">04</div>
+        <div>
+          <div class="enc-title">As Catacumbas Submersas</div>
+          <p class="enc-desc">Mergulhando através de um buraco no gelo do Lac Dinneshere, o partido descobriu câmaras netherese preservadas pelo frio. Orvyn tentou ativar um artefato e abriu brevemente um portal para o Plano do Gelo — fechado a custo.</p>
+        </div>
+        <span class="enc-tag tag-exploration">Exploração</span>
+      </div>
+
+      <div class="encounter-item reveal">
+        <div class="enc-num">05</div>
+        <div>
+          <div class="enc-title">O Coração de Auril</div>
+          <p class="enc-desc">No pico de Kelvin's Cairn, encontraram um fragmento de cristal que pulsa com magia divina — e que parece responder às emoções de Sylara. Mantê-lo seria poder. Destruí-lo pode libertar o sol. Ou não.</p>
+        </div>
+        <span class="enc-tag tag-mystery">Mistério</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="rune-line">❄ ✦ ❄ ✦ ❄</div>
+  <p>Icewind Dale: Rime of the Frostmaiden · Dungeons & Dragons 5e · Campanha em Andamento</p>
+  <p style="margin-top:0.5rem; font-size:10px; opacity:0.6;">D&D é uma marca registrada de Wizards of the Coast</p>
+</footer>
+
+<script>
+// Snowflakes
+const snow = document.getElementById('snow');
+const flakeChars = ['❄','❅','❆','·','*','•'];
+for (let i = 0; i < 60; i++) {
+  const f = document.createElement('span');
+  f.className = 'flake';
+  f.textContent = flakeChars[Math.floor(Math.random() * flakeChars.length)];
+  f.style.left = Math.random() * 100 + 'vw';
+  f.style.animationDuration = (8 + Math.random() * 14) + 's';
+  f.style.animationDelay = (Math.random() * 15) + 's';
+  f.style.fontSize = (8 + Math.random() * 14) + 'px';
+  f.style.opacity = 0.1 + Math.random() * 0.35;
+  snow.appendChild(f);
+}
+
+// Scroll reveal
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+revealEls.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
